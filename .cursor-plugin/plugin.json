@@ -1,0 +1,13 @@
+{
+  "name": "vibelib",
+  "description": "Explicit, reusable analysis workflows for Cursor Agent.",
+  "version": "0.1.0",
+  "license": "MIT",
+  "keywords": [
+    "agent-skills",
+    "analysis",
+    "decision-making",
+    "project-review",
+    "workflow"
+  ]
+}

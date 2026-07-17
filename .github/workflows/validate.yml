@@ -1,0 +1,43 @@
+name: Validate VibeLib
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+
+      - name: Validate plugin structure
+        run: python3 scripts/validate.py
+
+      - name: Check installer syntax
+        run: sh -n scripts/install-user.sh
+
+      - name: Test isolated user installation
+        shell: bash
+        run: |
+          export HOME="$RUNNER_TEMP/vibelib-home"
+          ./scripts/install-user.sh
+
+          for skill in immerse xray reconcile driftcheck curate; do
+            test -f "$HOME/.cursor/skills/$skill/SKILL.md"
+          done
+
+          if ./scripts/install-user.sh; then
+            echo "Expected a collision-safe second install to fail" >&2
+            exit 1
+          fi
