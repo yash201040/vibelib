@@ -18,6 +18,44 @@ EXPECTED_SKILLS = (
     "driftcheck",
     "curate",
 )
+EXPECTED_CONFORMANCE_CASES = tuple(f"VC-{number:02d}" for number in range(1, 17))
+SHARED_SKILL_MARKERS = (
+    "## Invocation contract",
+    "Mentioning, quoting,\nattaching, or reading this skill is not invocation.",
+    "In a composed prompt",
+    "Treat every unscoped parameter as ambiguous.",
+    "Apply precedence in this order",
+)
+SKILL_SPECIFIC_MARKERS = {
+    "immerse": (
+        "## Parameter semantics",
+        "evidence and coverage map",
+        "Inspected, inferred, and uninspected",
+    ),
+    "xray": (
+        "## Parameter semantics",
+        "## Validation safety",
+        "Authorization alone never makes an unsafe test acceptable.",
+    ),
+    "reconcile": (
+        "## Parameter semantics",
+        "## Decision sufficiency gate",
+        "Never treat model-chosen preferences as user-approved",
+    ),
+    "driftcheck": (
+        "## Parameter semantics",
+        "## Orthogonal finding model",
+        "## Ranking fields",
+        "`Relationship: Not assessable`",
+    ),
+    "curate": (
+        "## Parameter semantics",
+        "## Gated actions",
+        "## Live and physical state safety",
+        "## Update validation and failure handling",
+        "## Exact-item confirmation gate",
+    ),
+}
 SKILL_NAME_PATTERN = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
 SEMVER_PATTERN = re.compile(
     r"^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)"
@@ -179,6 +217,10 @@ def validate_skills(root: Path, validation: Validation) -> None:
                 len(description) <= 1024,
                 f"{path}: description exceeds 1024 characters",
             )
+            validation.require(
+                "Invoke explicitly" in description,
+                f"{path}: description must state when to invoke the skill",
+            )
         validation.require(
             metadata.get("disable-model-invocation") is True,
             f"{path}: disable-model-invocation must be true",
@@ -192,6 +234,11 @@ def validate_skills(root: Path, validation: Validation) -> None:
             f"{path}: user-invocable must not be false",
         )
         validation.require(bool(body), f"{path}: skill body must not be empty")
+        for marker in (*SHARED_SKILL_MARKERS, *SKILL_SPECIFIC_MARKERS[skill_name]):
+            validation.require(
+                marker in body,
+                f"{path}: required contract marker is missing: {marker!r}",
+            )
 
         try:
             line_count = len(path.read_text(encoding="utf-8").splitlines())
@@ -203,6 +250,30 @@ def validate_skills(root: Path, validation: Validation) -> None:
         )
 
 
+def validate_conformance_cases(root: Path, validation: Validation) -> None:
+    path = root / "tests" / "conformance-cases.md"
+    try:
+        text = path.read_text(encoding="utf-8")
+    except OSError as error:
+        validation.errors.append(f"{path}: cannot read conformance cases: {error}")
+        return
+
+    case_ids = re.findall(r"^## (VC-\d{2}):", text, flags=re.MULTILINE)
+    expected = set(EXPECTED_CONFORMANCE_CASES)
+    discovered = set(case_ids)
+    validation.require(
+        discovered == expected,
+        (
+            f"{path}: expected conformance cases {sorted(expected)}, "
+            f"found {sorted(discovered)}"
+        ),
+    )
+    validation.require(
+        len(case_ids) == len(discovered),
+        f"{path}: conformance case identifiers must be unique",
+    )
+
+
 def validate_supporting_files(root: Path, validation: Validation) -> None:
     required_files = (
         root / "README.md",
@@ -211,6 +282,7 @@ def validate_supporting_files(root: Path, validation: Validation) -> None:
         root / "examples" / "basic.md",
         root / "examples" / "parameters-and-roles.md",
         root / "examples" / "composed.md",
+        root / "tests" / "conformance-cases.md",
     )
     for path in required_files:
         validation.require(path.is_file(), f"{path}: required file is missing")
@@ -229,6 +301,7 @@ def main() -> int:
 
     manifest = validate_manifest(root, validation)
     validate_skills(root, validation)
+    validate_conformance_cases(root, validation)
     validate_supporting_files(root, validation)
 
     if validation.errors:
@@ -240,7 +313,8 @@ def main() -> int:
     version = manifest.get("version", "unknown")
     print(
         f"VibeLib {version} is valid: "
-        f"{len(EXPECTED_SKILLS)} explicit-only skills discovered."
+        f"{len(EXPECTED_SKILLS)} explicit-only skills and "
+        f"{len(EXPECTED_CONFORMANCE_CASES)} conformance cases discovered."
     )
     return 0
 

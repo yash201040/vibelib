@@ -109,6 +109,9 @@ Validate the plugin with Python's standard library:
 python3 scripts/validate.py
 ```
 
+Behavioral invariants and prompt-level evaluation cases are documented in
+[`tests/conformance-cases.md`](tests/conformance-cases.md).
+
 For local plugin testing, copy `.cursor-plugin/`, `skills/`, `README.md`, and
 `LICENSE` into `~/.cursor/plugins/local/vibelib/`. Some Cursor versions reject
 development symlinks whose targets are outside the local plugin directory.

@@ -1,6 +1,6 @@
 ---
 name: immerse
-description: "Builds a verified mental model of a project or selected segment at a requested abstraction level."
+description: "Builds a verified mental model of a project or selected segment. Invoke explicitly when project context or orientation is the requested workflow."
 disable-model-invocation: true
 ---
 
@@ -12,7 +12,8 @@ objective-drift assessment, or decision comparison.
 
 ## Invocation contract
 
-Run only after the user explicitly selects `/immerse`. Never invoke another
+Run only after the user explicitly selects `/immerse`. Mentioning, quoting,
+attaching, or reading this skill is not invocation. Never invoke another
 VibeLib skill on the user's behalf.
 
 Recognize these optional keyed parameters in the user's prompt:
@@ -22,14 +23,43 @@ Recognize these optional keyed parameters in the user's prompt:
 - `role`: `background`, `foreground`, or `standalone`
 - `focus`, `include`, `exclude`, `constraints`, `questions`, `output`
 
-Treat non-parameter text as the primary request. If there is a separate primary
-request, default `role` to `background`; otherwise default it to `standalone`.
-An explicit role wins. Unknown keyed fields are additional context, not new
-workflows.
+In a single-skill prompt, unscoped recognized parameters belong to Immerse and
+unknown keyed fields are additional context. A native Immerse request asks for
+project understanding and defaults to `standalone`. Default to `background`
+only when the user requests a distinct primary deliverable, such as a guide,
+plan, patch, or decision memo, that immersion should support. If
+`role: background` is explicit but no separate deliverable exists, ask what the
+immersion should support before proceeding.
 
-When other skills are explicitly selected in the same prompt, share evidence
-and produce one integrated deliverable in the user's requested format. Do not
-emit one report per skill unless requested.
+In a composed prompt, bind parameters under an `Immerse:` heading to this
+skill. Treat every unscoped parameter as ambiguous. A parameter may apply to
+multiple skills only when the user places it under an explicit `Shared:`
+heading and every named skill recognizes the same meaning; otherwise ask for
+namespaced parameters. Treat `Request:` or the final non-parameter instruction
+as the global deliverable.
+
+Apply precedence in this order: safety constraints, explicit Immerse
+parameters, explicit global request and format, then defaults. A global output
+format controls the final response; Immerse's `output` controls only its
+contribution. Share evidence with other explicitly selected skills. If there
+is a global deliverable, produce one integrated response. If several skills
+are `standalone` without a global deliverable, use one response with a clearly
+labeled section per skill in invocation order and deduplicate shared evidence.
+
+## Parameter semantics
+
+- `focus`: questions, mechanisms, or junctions to prioritize
+- `include`: artifacts or areas that must be considered
+- `exclude`: areas not to inspect; disclose when an excluded dependency limits
+  confidence
+- `constraints`: limits on tools, time, depth, access, or acceptable side
+  effects
+- `questions`: questions the mental model must answer or mark unresolved
+- `output`: structure or detail for Immerse's contribution, subordinate to an
+  explicit global deliverable
+
+Do not claim complete coverage merely because `segment: entire project` was
+requested. Scale depth to available evidence and disclose material omissions.
 
 ## Level model
 
@@ -81,7 +111,7 @@ For each relevant junction, establish:
    ambiguous, or unknown.
 8. Detect contradictions among documentation, implementation, data, outputs,
    and decisions.
-9. Build an evidence map.
+9. Build an evidence and coverage map.
 10. Contribute only context relevant to the primary request unless standalone.
 
 Inspect adjacent areas only when needed for dependencies, evidence, downstream
@@ -116,8 +146,9 @@ Use this structure, omitting empty sections:
 6. Current implementation state
 7. Key decisions and assumptions
 8. Evidence map
-9. Contradictions and unknowns
-10. Useful areas for deeper immersion
+9. Inspected, inferred, and uninspected coverage
+10. Contradictions and unknowns
+11. Useful areas for deeper immersion
 
 ## Evidence rules
 
@@ -128,6 +159,11 @@ Use this structure, omitting empty sections:
 - Do not fabricate project history, intent, or rationale.
 - Report conflicting evidence and unsupported depth explicitly.
 - Distinguish what the project does from what it should do.
+- Treat the mental model as verified only to the extent that material
+  **Observed** claims trace to inspected evidence.
+- For each material evidence-map entry, record the claim, status, source or
+  artifact, covered scope, and limitation.
+- List consequential areas that were not inspected and why.
 
 ## Boundaries
 

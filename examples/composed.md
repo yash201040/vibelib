@@ -24,16 +24,21 @@ Xray:
 Driftcheck:
   baseline: approved model-evaluation protocol
   current: current notebooks, outputs, and documentation
+  dimensions: data-or-method, documentation
+  rank-by: severity, decision-impact, confidence
   role: foreground
 
 Reconcile:
   option A: retain the current evaluation
   option B: rebuild using temporal external validation
   criteria: scientific validity, release risk, reproducibility, and effort
+  priority: scientific validity, then reproducibility
+  evidence-standard: strict
   role: foreground
 
-Write one release decision memo. Reuse evidence and do not return separate
-workflow reports.
+Request:
+  Write one release decision memo. Reuse evidence and do not return separate
+  workflow reports.
 ```
 
 Only the four selected skills are loaded. `/curate` is not selected and must
