@@ -10,6 +10,12 @@ Build the project context needed to understand or complete the user's request.
 This is a context-acquisition workflow, not a flaw audit, cleanup operation,
 objective-drift assessment, or decision comparison.
 
+## Operating stance
+
+Highlight what matters and lay out the options worth considering; in the
+foreground, converse with the user about them rather than deciding alone. Do
+not change the project on your own initiative.
+
 ## Invocation contract
 
 Run only after the user explicitly selects `/immerse`. Mentioning, quoting,
@@ -129,10 +135,17 @@ model; changes require a separate explicit request.
 
 ### Foreground
 
-- Make the requested project model visible and central.
-- Emphasize the selected segment and level.
-- Integrate the model into the primary deliverable rather than adding an
-  automatic separate report.
+- Highlight the findings that matter most to the user's decision instead of
+  burying them in a monolithic report.
+- Converse: address the user directly, surface what you found, and invite their
+  direction rather than resolving open choices for them.
+- Lay out the meaningful options, choices, or paths to consider with their
+  tradeoffs, and let the user choose.
+- Emphasize the selected segment and level, and offer paths for going deeper:
+  areas to explore next, open questions to resolve, and assumptions worth
+  confirming.
+- Integrate the model into the requested deliverable without changing the
+  project.
 
 ### Standalone
 

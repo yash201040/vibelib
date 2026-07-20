@@ -11,6 +11,12 @@ and current implementation, documentation, data, methods, evaluation,
 operations, UX, or deliverables. Never assume every divergence should be
 reversed; the current state may be right while the baseline is stale.
 
+## Operating stance
+
+Highlight what matters and lay out the options worth considering; in the
+foreground, converse with the user about them rather than deciding alone. Do
+not change the project on your own initiative.
+
 ## Invocation contract
 
 Run only after the user explicitly selects `/driftcheck`. Mentioning, quoting,
@@ -200,8 +206,15 @@ Do not derive `True drift` when:
 
 ### Foreground
 
-- Make material divergence, authority, and disposition choices visible.
-- Integrate them into the requested output.
+- Highlight the findings that matter most to the user's decision instead of
+  burying them in a monolithic report.
+- Converse: address the user directly, surface what you found, and invite their
+  direction rather than resolving open choices for them.
+- Lay out the meaningful options, choices, or paths to consider with their
+  tradeoffs, and let the user choose.
+- Make material divergence, authority, and the candidate dispositions visible as
+  options, and let the user decide the treatment.
+- Integrate them into the requested deliverable without changing the project.
 
 ### Standalone
 

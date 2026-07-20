@@ -35,21 +35,36 @@ role: foreground
 Write a release-readiness assessment.
 ```
 
-## Curate without destructive authority
+## Curate behind a single confirmation gate
 
 ```text
 /curate
-mode: update-and-prune
 scope: generated reports and their documentation
 source-of-truth: scripts/generate_reports.py and config/reporting.yaml
 preserve: published reports and accepted decision records
 role: standalone
 ```
 
-`update-and-prune` may update approved, reversible content. It still must stop
-after presenting the exact ledger for moves, quarantine, consolidation,
-replacement, archival, disabling, or deletion. The mode is not confirmation
-for any gated action.
+With no `mode`, Curate defaults to `propose`: it inventories the artifacts,
+classifies them, and presents every proposed edit and disposition behind one
+confirmation gate. It applies nothing until you confirm the exact items.
+
+Add `mode: auto` to let it apply clearly reversible, non-destructive edits on
+its own:
+
+```text
+/curate
+mode: auto
+scope: generated reports and their documentation
+source-of-truth: scripts/generate_reports.py and config/reporting.yaml
+preserve: published reports and accepted decision records
+role: standalone
+```
+
+Even under `mode: auto`, gated actions — moves, quarantine, consolidation,
+replacement, archival, disabling, deletion, and any live or physical-state
+change — still route back to the single confirmation gate. The mode is not
+confirmation for any of them.
 
 ## Bottom-level investigation
 

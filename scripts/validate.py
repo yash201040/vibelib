@@ -18,13 +18,17 @@ EXPECTED_SKILLS = (
     "driftcheck",
     "curate",
 )
-EXPECTED_CONFORMANCE_CASES = tuple(f"VC-{number:02d}" for number in range(1, 17))
+EXPECTED_CONFORMANCE_CASES = tuple(f"VC-{number:02d}" for number in range(1, 20))
 SHARED_SKILL_MARKERS = (
+    "## Operating stance",
+    "not change the project on your own initiative.",
     "## Invocation contract",
     "Mentioning, quoting,\nattaching, or reading this skill is not invocation.",
     "In a composed prompt",
     "Treat every unscoped parameter as ambiguous.",
     "Apply precedence in this order",
+    "Converse: address the user directly",
+    "let the user choose.",
 )
 SKILL_SPECIFIC_MARKERS = {
     "immerse": (
@@ -50,10 +54,12 @@ SKILL_SPECIFIC_MARKERS = {
     ),
     "curate": (
         "## Parameter semantics",
+        "## Autonomy and modes",
         "## Gated actions",
         "## Live and physical state safety",
-        "## Update validation and failure handling",
-        "## Exact-item confirmation gate",
+        "## Apply and validation",
+        "## The confirmation gate",
+        "single confirmation gate",
     ),
 }
 SKILL_NAME_PATTERN = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")

@@ -1,6 +1,6 @@
 ---
 name: curate
-description: "Assesses and safely updates project artifacts for coherence and reproducibility. Invoke explicitly when artifact curation or cleanup is requested."
+description: "Assesses project artifacts for coherence and reproducibility, then proposes updates behind a single confirmation gate. Invoke explicitly when artifact curation or cleanup is requested."
 disable-model-invocation: true
 ---
 
@@ -8,7 +8,15 @@ disable-model-invocation: true
 
 Bring project artifacts into a coherent, current, useful, and reproducible
 state. Identify stale artifacts and propose consolidation, archival,
-quarantine, or deletion without erasing history or provenance.
+quarantine, or deletion without erasing history or provenance. Propose first
+and apply only what the user confirms; edit automatically only when the user
+explicitly asks for it.
+
+## Operating stance
+
+Highlight what matters and lay out the options worth considering; in the
+foreground, converse with the user about them rather than deciding alone. Do
+not change the project on your own initiative.
 
 ## Invocation contract
 
@@ -18,18 +26,18 @@ VibeLib skill on the user's behalf.
 
 Recognize these optional keyed parameters:
 
-- `mode`: `report`, `update`, or `update-and-prune`; default `report`
+- `mode`: `propose` (default) or `auto`
 - `scope`, `source-of-truth`, `include`, `exclude`, `preserve`
 - `staleness-basis`, `generated-policy`, `disposition`, `verification`
 - `role`: `background`, `foreground`, or `standalone`
 - `output`
 
-An unambiguous request to update named, non-destructive artifacts may select
-`update`; otherwise use `report`. Never infer `update-and-prune`.
+When `mode` is absent, use `propose`. Never infer `auto`; select it only when
+the user explicitly asks curate to apply edits automatically.
 
 In a single-skill prompt, unscoped recognized parameters belong to Curate and
 unknown keyed fields are additional context. A native Curate request asks for
-artifact assessment or approved updates and defaults to `standalone`. Default
+artifact assessment or proposed updates and defaults to `standalone`. Default
 to `background` only when the user requests a distinct primary deliverable,
 such as a release package or handoff, that curation should support. If
 `role: background` is explicit but no separate deliverable exists, ask what the
@@ -65,8 +73,8 @@ invocation order.
   calibration state, or reproducibility result; if omitted, derive and state
   the basis before classifying staleness
 - `disposition`: requested candidate actions such as keep, update, regenerate,
-  move, archive, quarantine, consolidate, replace, or delete; it does not
-  authorize a gated action
+  move, archive, quarantine, consolidate, replace, or delete; it proposes an
+  option and does not authorize any action
 - `verification`: checks required after updates, including expected outputs,
   dependency checks, calibration, review, or recovery validation
 - `output`: structure or detail for Curate's contribution, subordinate to an
@@ -81,29 +89,34 @@ invocation order.
 If a supplied value falls outside these forms or conflicts with `preserve`,
 ask for clarification.
 
-## Modes
+## Autonomy and modes
 
-### Report
+Curate assesses artifacts and proposes an ordered set of edits and
+dispositions. `mode` controls only what happens to that proposal; it never
+changes what curate is willing to touch.
 
-Inspect, classify, and propose changes. Do not modify anything.
+### Propose (default)
 
-### Update
+Inventory, classify, and highlight. Present every proposed edit and disposition
+as one consolidated plan, then stop at the single confirmation gate. Apply
+nothing until the user confirms. This is the behavior whenever `mode` is
+absent.
 
-Update explicitly requested content in named artifacts when the change is
-reversible and does not alter artifact identity or availability. Do not perform
-any gated action.
+### Auto
 
-### Update and prune
-
-Update approved artifacts first. Then present an exact proposal for every gated
-action and stop for explicit confirmation. Selecting this mode does not itself
-confirm any gated action.
+Selected only when the user explicitly passes `mode: auto`. Apply the
+reversible, non-destructive edits in the plan automatically, without waiting at
+the gate, and report every change made. Gated actions are never auto-applied;
+they always return to the single confirmation gate even under `auto`. If any
+proposed edit is not clearly reversible and non-destructive, route it to the
+gate rather than applying it.
 
 ## Safety contract
 
-1. Default to report when modification intent is ambiguous.
+1. Default to `propose` when autonomy is ambiguous; never read a general
+   request as permission to apply.
 2. Never perform a gated action from a general request such as "clean
-   everything."
+   everything," and never from `mode: auto` alone.
 3. Never permanently overwrite irreplaceable or authoritative material without
    exact-item confirmation and a recovery method.
 4. Prefer proposing archive or quarantine over deletion when uncertainty is
@@ -119,8 +132,8 @@ confirm any gated action.
 
 ## Gated actions
 
-The following require the exact-item confirmation gate even when
-`mode: update-and-prune` is selected:
+These actions always require the single confirmation gate, even under
+`mode: auto`:
 
 - moving or renaming
 - archiving or quarantining
@@ -128,6 +141,8 @@ The following require the exact-item confirmation gate even when
 - consolidating, merging, or replacing
 - deleting
 - permanently overwriting irreplaceable or authoritative material
+- any change that is not clearly reversible and non-destructive
+- any live- or physical-state change
 
 Treat a consolidation as two phases: create and validate the proposed combined
 artifact without removing sources, then gate every source disposition. A
@@ -136,10 +151,10 @@ never confirmation.
 
 ## Live and physical state safety
 
-Reversibility alone does not make a live-state change safe. Before changing
-production or operational state, equipment or instrument settings, a physical
-environment, or directly enacting a procedure change in live operations,
-require all of:
+Reversibility alone does not make a live-state change safe, and `mode: auto`
+never authorizes one. Before changing production or operational state,
+equipment or instrument settings, a physical environment, or directly enacting
+a procedure change in live operations, require all of:
 
 1. The exact target, expected side effects, affected people or systems, and
    hazard boundaries are stated.
@@ -150,9 +165,9 @@ require all of:
    state are available.
 6. Required permissions, safety controls, and applicable policy are satisfied.
 
-If any condition is missing, remain in report mode and propose the controlled
-change. Never perform an illegal, uncontrolled, irrecoverable, or foreseeably
-harmful live or physical action.
+If any condition is missing, stay in `propose` and offer the controlled change
+as an option. Never perform an illegal, uncontrolled, irrecoverable, or
+foreseeably harmful live or physical action.
 
 ## Artifact classifications
 
@@ -181,32 +196,14 @@ Use one or more of:
 5. Detect staleness, contradiction, duplication, broken references, and
    orphaning.
 6. Determine which artifacts can be reproduced.
-7. Build an ordered update plan with success criteria and recovery for each
-   change.
-8. Apply approved non-destructive updates only when the mode permits.
-9. Validate regenerated or updated artifacts.
-10. Prepare an exact disposition ledger.
-11. Request confirmation before every gated action.
-12. Report completed actions and unresolved items.
-
-## Update validation and failure handling
-
-Before an update, capture or identify the prior state, required verification,
-dependent changes, and a safe recovery method. If success criteria are absent
-and cannot be derived from authoritative evidence, ask before modifying.
-
-If validation fails:
-
-1. Stop dependent updates and all gated actions.
-2. Use only a pre-approved, verified-safe rollback or recovery.
-3. For artifact-only changes when safe recovery is unavailable, preserve the
-   evidence and current artifact state, identify every partial change, and
-   request direction.
-4. For a live or physical change, enter the pre-approved fail-safe or
-   operational stop, preserve evidence, and escalate; never leave an
-   unvalidated state active.
-5. Never report the curation as complete or continue from a failed intermediate
-   state without explicit acceptance and a revised plan.
+7. Build one ordered plan of proposed edits and dispositions, each with a
+   reason, evidence, success criteria, and recovery.
+8. Present the plan and, for each item, the options worth considering.
+9. Under `propose`, stop at the single confirmation gate. Under `auto`, apply
+   the reversible, non-destructive edits and route every gated action to the
+   gate.
+10. Validate every applied change.
+11. Report completed actions, gate-pending items, and unresolved items.
 
 Build the dependency graph from the project rather than imposing a fixed
 software-oriented order. Consider any relevant:
@@ -232,10 +229,31 @@ expansion; do not silently edit upstream code, data, configuration, procedures,
 or equipment settings. Do not manually patch generated output unless the user
 explicitly accepts a documented, non-reproducible exception.
 
-## Exact-item confirmation gate
+## Apply and validation
 
-Before any gated action, assign a stable ledger identifier such as
-`CURATE-LEDGER-1` and list every candidate with:
+Before applying any edit, capture or identify the prior state, required
+verification, dependent changes, and a safe recovery method. If success
+criteria are absent and cannot be derived from authoritative evidence, ask
+before modifying.
+
+If validation fails:
+
+1. Stop dependent updates and all gated actions.
+2. Use only a pre-approved, verified-safe rollback or recovery.
+3. For artifact-only changes when safe recovery is unavailable, preserve the
+   evidence and current artifact state, identify every partial change, and
+   request direction.
+4. For a live or physical change, enter the pre-approved fail-safe or
+   operational stop, preserve evidence, and escalate; never leave an
+   unvalidated state active.
+5. Never report the curation as complete or continue from a failed intermediate
+   state without explicit acceptance and a revised plan.
+
+## The confirmation gate
+
+Present one consolidated gate for everything awaiting confirmation. Assign a
+stable ledger identifier such as `CURATE-LEDGER-1` and list every pending item
+with:
 
 - exact item path or identifier
 - proposed action
@@ -272,20 +290,29 @@ confirmation.
 
 ### Foreground
 
-- Make relevant stale artifacts and proposed updates visible.
-- Integrate curation status into the requested deliverable.
+- Highlight the findings that matter most to the user's decision instead of
+  burying them in a monolithic report.
+- Converse: address the user directly, surface what you found, and invite their
+  direction rather than resolving open choices for them.
+- Lay out the meaningful options, choices, or paths to consider with their
+  tradeoffs, and let the user choose.
+- Surface the relevant stale or inconsistent artifacts and present the
+  candidate dispositions per item as options.
+- Integrate the curation status into the requested deliverable, and apply edits
+  only as the active `mode` permits — routing every gated action to the single
+  confirmation gate.
 
 ### Standalone
 
-Use this structure:
+Use this structure, omitting empty sections:
 
 1. Curation status
 2. Source-of-truth map
 3. Artifact inventory
 4. Stale or inconsistent artifacts
-5. Update plan or completed updates
-6. Validation results
-7. Disposition ledger
+5. Proposed plan and per-item options
+6. Applied updates and validation results
+7. Confirmation gate ledger
 8. Items awaiting confirmation
 9. Unknowns and blocked items
 10. Reproducibility and handoff notes
@@ -300,8 +327,9 @@ Use this structure:
 
 ## Boundaries
 
-Do not redesign under the label of cleanup, change artifact identity or
-availability based only on age or naming, remove decision-useful failed
+Do not redesign under the label of cleanup, apply edits the user did not
+confirm or explicitly authorize through `mode: auto`, change artifact identity
+or availability based only on age or naming, remove decision-useful failed
 experiments without exact-item confirmation, rewrite project history to appear
 cleaner, automatically resolve objective drift, or treat unfamiliar files as
 unnecessary.

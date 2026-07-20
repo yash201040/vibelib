@@ -8,7 +8,15 @@ VibeLib provides five slash-invoked Agent Skills:
 - `/xray` — find material flaws, failure modes, and risks
 - `/reconcile` — compare alternatives and support a defensible decision
 - `/driftcheck` — compare an authoritative baseline with the current state
-- `/curate` — safely assess and update project artifacts
+- `/curate` — assess project artifacts and propose updates behind a
+  confirmation gate
+
+Every skill is advisory by default: it highlights what it found, discusses the
+options and paths worth considering, and leaves the decision to you. No skill
+changes your project on its own initiative. The one exception is `/curate`,
+which can apply reversible edits automatically when you pass `mode: auto`;
+without it, `/curate` gathers every proposed edit behind a single confirmation
+gate and applies nothing until you confirm.
 
 It works in Cursor IDE and the desktop Agents Window. There is no MCP server,
 package dependency, virtual environment, or runtime to maintain.
@@ -78,7 +86,8 @@ Each skill documents its own parameters. Common options include:
 - `focus` — questions or risks to prioritize
 - `role`:
   - `background` — improve another requested deliverable
-  - `foreground` — show the analysis within the requested deliverable
+  - `foreground` — highlight findings, discuss the options, and let you decide
+    within the requested deliverable
   - `standalone` — return the workflow's complete report
 
 You can explicitly select several skills in one prompt. See the

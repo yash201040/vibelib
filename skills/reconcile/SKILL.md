@@ -10,6 +10,12 @@ Compare opposing, alternate, or incompatible human, AI, stakeholder,
 methodological, or implementation proposals. Expose the real disagreement
 rather than flattening it into a vague compromise.
 
+## Operating stance
+
+Highlight what matters and lay out the options worth considering; in the
+foreground, converse with the user about them rather than deciding alone. Do
+not change the project on your own initiative.
+
 ## Invocation contract
 
 Run only after the user explicitly selects `/reconcile`. Mentioning, quoting,
@@ -149,9 +155,17 @@ conditional value judgments drive the result.
 
 ### Foreground
 
-- Make the tradeoff analysis and decisive criteria visible.
-- Show accepted costs and unresolved uncertainty.
-- Integrate the analysis into the requested output.
+- Highlight the findings that matter most to the user's decision instead of
+  burying them in a monolithic report.
+- Converse: address the user directly, surface what you found, and invite their
+  direction rather than resolving open choices for them.
+- Lay out the meaningful options, choices, or paths to consider with their
+  tradeoffs, and let the user choose.
+- Make the decisive criteria and accepted costs visible, and present the viable
+  paths — status quo, hybrid, phased, and reversible tests — for the user to
+  pick.
+- Integrate the analysis into the requested deliverable without changing the
+  project.
 
 ### Standalone
 

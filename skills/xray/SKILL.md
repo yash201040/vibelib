@@ -10,6 +10,12 @@ Investigate flaws, discrepancies, invalid assumptions, failure modes, and
 material risks. This is an adversarial review workflow, not general context
 building.
 
+## Operating stance
+
+Highlight what matters and lay out the options worth considering; in the
+foreground, converse with the user about them rather than deciding alone. Do
+not change the project on your own initiative.
+
 ## Invocation contract
 
 Run only after the user explicitly selects `/xray`. Mentioning, quoting,
@@ -210,9 +216,17 @@ a fix unless the user separately requests implementation.
 
 ### Foreground
 
-- Make key findings, failure paths, and evidence visible.
-- Prioritize the user's decision and integrate findings into the requested
-  deliverable.
+- Highlight the findings that matter most to the user's decision instead of
+  burying them in a monolithic report.
+- Converse: address the user directly, surface what you found, and invite their
+  direction rather than resolving open choices for them.
+- Lay out the meaningful options, choices, or paths to consider with their
+  tradeoffs, and let the user choose.
+- Make the key failure paths and evidence visible, and present the fix choices
+  (containment, robust fix, redesign) as options to weigh rather than changes to
+  make.
+- Integrate the findings into the requested deliverable without changing the
+  project.
 
 ### Standalone
 
